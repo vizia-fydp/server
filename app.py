@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 
@@ -5,7 +6,8 @@ from flask_socketio import SocketIO, emit
 app = Flask(__name__)
 
 # Configure socket IO
-# app.config['SECRET_KEY'] = 'secret!'
+# enables secure client connection
+app.config['SECRET_KEY'] = os.urandom(12)
 socketio = SocketIO(app)
 
 # Homepage URL routing
