@@ -15,7 +15,10 @@ def index():
         socketio.emit("test", "Hello from Flask SocketIO!")
         return "HELLO"
     else:
-        pass
+        data = request.form["msg"]
+        print(data)
+        socketio.emit("test", data)
+        return "Success"
 
 @socketio.on('connect')
 def connect():
