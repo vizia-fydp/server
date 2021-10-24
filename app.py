@@ -1,4 +1,6 @@
 import os
+import numpy as np
+import cv2
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 
@@ -21,6 +23,23 @@ def index():
         print(data)
         socketio.emit("test", data)
         return "Success"
+
+@app.route('/image', methods=['POST'])
+def image():
+    if request.method == 'POST':
+        # convert string of image data to uint8
+        nparr = np.frombuffer(request.data, np.uint8)
+
+        # decode image
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        # Convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        cv2.imwrite('gray.jpg', gray)
+
+        return "SUCCESS"
+    else:
+        return "ERROR"
 
 @socketio.on('connect')
 def connect():
