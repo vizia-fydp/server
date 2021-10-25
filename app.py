@@ -1,9 +1,9 @@
-import os
-import numpy as np
 import cv2
+import os
 import jsonpickle
+import numpy as np
 from flask import Flask, request, Response
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
 from color_detection.detect import detect_color
 
 # Initialize flask app

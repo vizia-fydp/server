@@ -1,9 +1,20 @@
-import pandas as pd
-import numpy as np
 import cv2
+import os
+import numpy as np
+import pandas as pd
 
-# https://stackoverflow.com/questions/43111029/how-to-find-the-average-colour-of-an-image-in-python-with-opencv
 def most_dominant_color(img):
+    """
+    Finds the most dominant color in an image using K means clustering.
+    Idea was inspired by https://rb.gy/ik31uk
+
+    Args:
+        img : np array containing raw image data in RGB format
+
+    Returns:
+        numpy array [R, G, B] containing the RGB values of
+        the most dominant color
+    """
     # Convert to float32 array of N x 3, where each row is a pixel (R, G, B)
     pixels = np.float32(img.reshape(-1, 3))
 
@@ -19,7 +30,19 @@ def most_dominant_color(img):
     return np.array(dominant)
 
 def detect_color(img):
-    colors = pd.read_csv("color_detection/colors.csv")
+    """
+    Finds the most dominant color in an image and matches it to
+    a human readable string. (Eg. Red, Green, Blue, Yellow, etc.)
+
+    Args:
+        img : np array containing raw image data in RGB format
+
+    Returns:
+        [color_name, rgb]: String with the color's name, and a list
+            containing the [R, G, B] pixels of the most dominant color
+    """
+    colors = pd.read_csv("{}/colors.csv".format(
+        os.path.dirname(os.path.realpath(__file__))))
     mdc = most_dominant_color(img)
 
     mdc_name = ""
@@ -33,6 +56,3 @@ def detect_color(img):
             mdc_name = row["Name"]
 
     return mdc_name, mdc.tolist()
-
-if __name__ == "__main__":
-    detect_color()
