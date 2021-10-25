@@ -1,19 +1,21 @@
 import os
 import numpy as np
 import cv2
-from flask import Flask, request
+import jsonpickle
+from flask import Flask, request, Response
 from flask_socketio import SocketIO, emit
+from color_detection.detect import detect_color
 
 # Initialize flask app
 app = Flask(__name__)
 
 # Configure socket IO
 # enables secure client connection
-app.config['SECRET_KEY'] = os.urandom(12)
+app.config["SECRET_KEY"] = os.urandom(12)
 socketio = SocketIO(app)
 
 # Homepage URL routing
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == 'GET':
         socketio.emit("test", "Hello from Flask SocketIO!")
@@ -24,24 +26,29 @@ def index():
         socketio.emit("test", data)
         return "Success"
 
-@app.route('/image', methods=['POST'])
+@app.route("/detect_color", methods=["POST"])
 def image():
-    if request.method == 'POST':
-        # convert string of image data to uint8
-        nparr = np.frombuffer(request.data, np.uint8)
+    if request.method == "POST":
+        # Convert string of image data to uint8
+        np_arr = np.frombuffer(request.data, np.uint8)
 
-        # decode image
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        # Decode image
+        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-        # Convert to grayscale
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite('gray.jpg', gray)
+        # Perform Color detection
+        color_name, rgb = detect_color(img)
 
-        return "SUCCESS"
+        # Prepare and return response
+        response = {"color_name" : color_name, "rgb" : rgb}
+        return Response(
+            response = jsonpickle.encode(response),
+            status = 200,
+            mimetype = "application/json"
+        )
     else:
         return "ERROR"
 
-@socketio.on('connect')
+@socketio.on("connect")
 def connect():
     print("Succesfully connected")
 
