@@ -15,8 +15,9 @@ if __name__ == "__main__":
     content_type = "image/jpeg"
     headers = {"content-type": content_type}
 
-    img = cv2.imread("img/lego.png")
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # img = cv2.imread("img/lego.png")
+    img = cv2.imread("img/leaves.jpg")
+
     # encode image as jpeg
     _, img_encoded = cv2.imencode(".jpg", img)
 

@@ -34,6 +34,7 @@ def image():
 
         # Decode image
         img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         # Perform Color detection
         color_name, rgb = detect_color(img)
