@@ -36,11 +36,23 @@ def image():
         img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        # Perform Color detection
-        color_name, rgb = detect_color(img)
+        # Perform color detection
+        color_names, rgb_array = detect_color(img, 3)
+
+        # Convert list of colors into one string
+        # Eg: ["Red", "Blue", "Green"] -> "Red, Blue, and Green"
+        color_text = ""
+        if len(color_names) == 1:
+            color_text = color_names[0]
+        else:
+            for idx, color in enumerate(color_names):
+                if idx == (len(color_names) - 1):
+                    color_text += "and {}".format(color)
+                else:
+                    color_text += "{}, ".format(color)
 
         # Prepare and return response
-        response = {"color_name" : color_name, "rgb" : rgb}
+        response = {"colors" : color_text, "rgb" : rgb_array}
         return Response(
             response = jsonpickle.encode(response),
             status = 200,
