@@ -19,10 +19,10 @@ def top_k_colors(img, k):
     # Convert to float32 array of N x 3, where each row is a pixel (R, G, B)
     pixels = np.float32(img.reshape(-1, 3))
 
-    # Perform K Means clustering
+    # Perform K Means clustering with 2*k means
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     flags = cv2.KMEANS_RANDOM_CENTERS
-    _, labels, palette = cv2.kmeans(pixels, k, None, criteria, 10, flags)
+    _, labels, palette = cv2.kmeans(pixels, 2*k, None, criteria, 10, flags)
     _, counts = np.unique(labels, return_counts=True)
 
     # Sort color counts
@@ -34,7 +34,8 @@ def top_k_colors(img, k):
     for key in sorted(count_to_color, reverse=True):
         colors_sorted.append(np.array(count_to_color[key]))
 
-    return colors_sorted
+    # Return top 3 colors only
+    return colors_sorted[0:k]
 
 def most_dominant_color(img):
     """
@@ -83,9 +84,15 @@ def detect_color(img, k):
     color_names = []
     top_k_list = []
     for color in top_k:
+        top_k_list.append(color.tolist())
+
+        # Convert to HSV
+        # color = cv2.cvtColor(np.uint8([[color]]), cv2.COLOR_RGB2HSV)[0][0]
+
         min_dist = np.inf
         color_name = ""
         for _, row in colors.iterrows():
+            # hsv_array = np.array([row["H"], row["S"], row["V"]])
             rgb_array = np.array([row["R"], row["G"], row["B"]])
 
             dist = np.linalg.norm(color - rgb_array)
@@ -93,6 +100,5 @@ def detect_color(img, k):
                 min_dist = dist
                 color_name = row["Name"]
         color_names.append(color_name)
-        top_k_list.append(color.tolist())
 
     return color_names, top_k_list
