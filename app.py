@@ -4,7 +4,7 @@ import jsonpickle
 import numpy as np
 from flask import Flask, request, Response
 from flask_socketio import SocketIO
-from color_detection.detect import detect_color
+from color_detection.detect import detect_color, detect_color_2
 
 # Initialize flask app
 app = Flask(__name__)
@@ -60,6 +60,39 @@ def image():
         )
     else:
         return "ERROR"
+
+@app.route("/detect_color_2", methods=["POST"])
+def image2():
+    if request.method == "POST":
+        # Convert string of image data to uint8
+        np_arr = np.frombuffer(request.data, np.uint8)
+
+        # Decode image
+        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        # Perform color detection
+        color_names = detect_color_2(img, 3)
+
+        # Convert list of colors into one string
+        # Eg: ["Red", "Blue", "Green"] -> "Red, Blue, and Green"
+        color_text = ""
+        if len(color_names) == 1:
+            color_text = color_names[0]
+        else:
+            for idx, color in enumerate(color_names):
+                if idx == (len(color_names) - 1):
+                    color_text += "and {}".format(color)
+                else:
+                    color_text += "{}, ".format(color)
+
+        # Prepare and return response
+        response = {"colors" : color_text}
+        return Response(
+            response = jsonpickle.encode(response),
+            status = 200,
+            mimetype = "application/json"
+        )
 
 @socketio.on("connect")
 def connect():
