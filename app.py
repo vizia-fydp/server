@@ -121,13 +121,11 @@ def ocr():
         }
 
         endpoint = "https://vision.googleapis.com/v1/images:annotate?key={key}".format(key=api_key)
-
         r = requests.post(endpoint, json=data)
 
         # Prepare and return response
-        response = {"ocr_text" : r.text}
         return Response(
-            response = jsonpickle.encode(response),
+            response = jsonpickle.encode(r),
             status = 200,
             mimetype = "application/json"
         )
