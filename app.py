@@ -139,4 +139,5 @@ def connect():
 
 
 if __name__ == "__main__":
-    socketio.run(app)
+    # Running on port 0 will force OS to assign a randomly available port number
+    socketio.run(app, port=0)
