@@ -125,7 +125,7 @@ def ocr():
 
         # Prepare and return response
         return Response(
-            response = jsonpickle.encode(r),
+            response = jsonpickle.encode(r.text),
             status = 200,
             mimetype = "application/json"
         )
