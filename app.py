@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 
 import cv2
+import json
 import jsonpickle
 import numpy as np
 from flask import Flask, request, Response
@@ -120,12 +121,18 @@ def ocr():
             }]
         }
 
+        # Make request to google vision api
         endpoint = "https://vision.googleapis.com/v1/images:annotate?key={key}".format(key=api_key)
-        r = requests.post(endpoint, json=data)
+        r = json.loads(requests.post(endpoint, json=data).text)
 
-        # Prepare and return response
+        # Extract text from vision api response and pack it in a response dict
+        response = {"text" :
+            r["responses"][0]["fullTextAnnotation"]["text"]
+                .replace("\n", " ")
+        }
+
         return Response(
-            response = jsonpickle.encode(r.text),
+            response = jsonpickle.encode(response),
             status = 200,
             mimetype = "application/json"
         )
