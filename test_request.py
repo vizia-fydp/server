@@ -7,13 +7,14 @@ import cv2
 
 
 #URL = "http://127.0.0.1:5000"
-URL = "http://9b58-2607-fea8-1ba3-6a00-cdb1-7977-f830-77df.ngrok.io"
+URL = "https://e137-64-229-183-215.ngrok.io"
 
 
 def color_detection_test(filename):
     # prepare headers for http request
     content_type = "image/jpeg"
     headers = {"content-type": content_type}
+    params = {"k": 3}
 
     # img = cv2.imread("img/lego.png")
     img = cv2.imread(filename)
@@ -25,15 +26,21 @@ def color_detection_test(filename):
     response = requests.post(
         url = "{}/detect_color".format(URL),
         data = img_encoded.tobytes(),
-        headers = headers
+        headers = headers,
+        params = params
     )
 
-    return json.loads(response.text)
+    if response.status_code != 200:
+        print("detect_color error")
+    else:
+        return json.loads(response.text)
+
 
 def ocr_test(filename):
     # prepare headers for http request
     content_type = "image/jpeg"
     headers = {"content-type": content_type}
+    params = {"type": "TEXT_DETECTION"}
 
     with open(filename, 'rb') as img_file:
         img_content = img_file.read()
@@ -43,10 +50,15 @@ def ocr_test(filename):
     response = requests.post(
         url = "{}/ocr".format(URL),
         data = encoded_img,
-        headers = headers
+        headers = headers,
+        params = params
     )
 
-    return json.loads(response.text)
+    if response.status_code != 200:
+        print("ocr error")
+        print(response.text)
+    else:
+        return json.loads(response.text)
 
 
 if __name__ == "__main__":

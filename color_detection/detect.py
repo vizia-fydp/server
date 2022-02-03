@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
+
 def top_k_colors(img, k):
     """
     Finds the most dominant k colors in an image using k means clustering.
@@ -37,6 +38,7 @@ def top_k_colors(img, k):
     # Return top 3 colors only
     return colors_sorted[0:k]
 
+
 def most_dominant_color(img):
     """
     Finds the most dominant color in an image using K means clustering.
@@ -63,10 +65,12 @@ def most_dominant_color(img):
     dominant = palette[np.argmax(counts)]
     return np.array(dominant)
 
+
 def detect_color(img, k):
     """
     Finds the most dominant k colors in an image and matches it to
     a human readable string. (Eg. Red, Green, Blue, Yellow, etc.)
+    Uses k-means clustering to find images.
 
     Args:
         img : np array containing raw image data in RGB format
@@ -97,10 +101,13 @@ def detect_color(img, k):
 
     return top_k_names, top_k_list
 
+
 def detect_color_2(img, k):
     """
     Finds the most dominant k colors in an image and matches it to
     a human readable string. (Eg. Red, Green, Blue, Yellow, etc.)
+    Uses euclidean distance from each pixel to a color dataset to find
+    top colors.
 
     Args:
         img : np array containing raw image data in RGB format

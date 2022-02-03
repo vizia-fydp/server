@@ -12,6 +12,7 @@ import requests
 
 from color_detection.detect import detect_color, detect_color_2
 
+
 # Initialize flask app
 app = Flask(__name__)
 
@@ -35,7 +36,24 @@ def index():
 
 
 @app.route("/detect_color", methods=["POST"])
-def image():
+def detect_color_route():
+    """
+    Performs color detection using k-means clustering
+    ---
+
+    Data:
+        jpg encoded image data
+
+    Parameters:
+        k : Query parameter.
+            The number of colors to return. Defaults to 3 if this parameter is
+            not provided.
+
+    Response:
+        colors: A single string with color results in order from
+            most dominant to least dominant. Eg: "Red, Green, and Blue" .
+        rgb: A list containing the [R, G, B] values for each color detected
+    """
     if request.method == "POST":
         # Convert string of image data to uint8
         np_arr = np.frombuffer(request.data, np.uint8)
@@ -45,7 +63,13 @@ def image():
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         # Perform color detection
-        color_names, rgb_array = detect_color(img, 3)
+        k = request.args.get("k")
+        try:
+            k = 3 if k is None else k
+            k = int(k)
+        except ValueError:
+            return Response(status = 400)
+        color_names, rgb_array = detect_color(img, k)
 
         # Convert list of colors into one string
         # Eg: ["Red", "Blue", "Green"] -> "Red, Blue, and Green"
@@ -67,10 +91,27 @@ def image():
             mimetype = "application/json"
         )
     else:
-        return "ERROR"
+        return Response(status = 404)
+
 
 @app.route("/detect_color_2", methods=["POST"])
-def image2():
+def detect_color_2_route():
+    """
+    Performs color detection using euclidean distance matching
+    ---
+
+    Data:
+        jpg encoded image data
+
+    Parameters:
+        k : Query parameter.
+            The number of colors to return. Defaults to 3 if this paramter is
+            not provided.
+
+    Response:
+        colors: A single string with color results in order from
+            most dominant to least dominant. Eg: "Red, Green, and Blue" .
+    """
     if request.method == "POST":
         # Convert string of image data to uint8
         np_arr = np.frombuffer(request.data, np.uint8)
@@ -80,7 +121,13 @@ def image2():
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         # Perform color detection
-        color_names = detect_color_2(img, 3)
+        k = request.args.get("k")
+        try:
+            k = 3 if k is None else k
+            k = int(k)
+        except ValueError:
+            return Response(status = 400)
+        color_names = detect_color_2(img, k)
 
         # Convert list of colors into one string
         # Eg: ["Red", "Blue", "Green"] -> "Red, Blue, and Green"
@@ -102,12 +149,32 @@ def image2():
             mimetype = "application/json"
         )
     else:
-        return "ERROR"
+        return Response(status = 404)
+
 
 @app.route("/ocr", methods=["POST"])
-def ocr():
+def ocr_route():
+    """
+    Performs Optical Character Recognition (OCR) using the Google Cloud
+    Vision API (https://cloud.google.com/vision/docs/reference/rest/v1/images/annotate)
+    ---
+
+    Data:
+        Base64 encoded string of image data
+
+    Parameters:
+        type : Query parameter.
+            "DOCUMENT_TEXT_DETECTION" for document text,
+            "TEXT_DETECTION" for everything else (in-the-wild and handwritten).
+            Defaults to "TEXT_DETECTION" if not provided.
+
+    Response:
+        text: A single string containing all the OCR results
+    """
     if request.method == "POST":
         api_key = Path("ocr/api_key.txt").resolve().read_text()
+        detection_type = request.args.get("type")
+        detection_type = "TEXT_DETECTION" if detection_type is None else detection_type
 
         # Prepare request dict
         data = {
@@ -116,16 +183,21 @@ def ocr():
                     "content": request.data.decode('utf-8')
                 },
                 "features":[{
-                    "type": "TEXT_DETECTION"
+                    "type": detection_type
                 }]
             }]
         }
 
         # Make request to google vision api
         endpoint = "https://vision.googleapis.com/v1/images:annotate?key={key}".format(key=api_key)
-        r = json.loads(requests.post(endpoint, json=data).text)
+        google_response = requests.post(endpoint, json=data)
+
+        if google_response.status_code != 200:
+            # If we got an error, just return it
+            return google_response
 
         # Extract text from vision api response and pack it in a response dict
+        r = json.loads(google_response.text)
         response = {"text" :
             r["responses"][0]["fullTextAnnotation"]["text"]
                 .replace("\n", " ")
@@ -137,7 +209,7 @@ def ocr():
             mimetype = "application/json"
         )
     else:
-        return "ERROR"
+        return Response(status = 404)
 
 
 @socketio.on("connect")
