@@ -7,7 +7,7 @@ import cv2
 
 
 #URL = "http://127.0.0.1:5000"
-URL = "https://e137-64-229-183-215.ngrok.io"
+URL = "https://b1af-64-229-183-215.ngrok.io"
 
 
 def color_detection_test(filename):
@@ -61,6 +61,22 @@ def ocr_test(filename):
         return json.loads(response.text)
 
 
+def socket_test(path):
+    params = {"path": path}
+    msg = ("There are roughly 253 million people globally who have some form "
+           "of visual impairment. Sighted individuals take for granted the "
+           "richness of visual information available to them in order to "
+           "navigate the world. We have developed wearable glasses that can "
+           "extract, decode, and communicate information from an image to a "
+           "visually impaired user through audio transcription. Our system "
+           "leverages computer vision to perform optical character "
+           "recognition, money classification, and colour detection")
+    requests.post(
+        url = "{}/socket_emit".format(URL),
+        data = msg,
+        params = params
+    )
+
 if __name__ == "__main__":
     ### Color det test
     response = color_detection_test("test_images/color_detection/flowers.jpg")
@@ -69,3 +85,6 @@ if __name__ == "__main__":
     ### OCR test
     response = ocr_test("test_images/ocr/eardrops.jpg")
     print(response)
+
+    socket_test("iOS_info")
+    # socket_test("iOS_results")

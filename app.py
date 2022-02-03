@@ -21,18 +21,33 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(12)
 socketio = SocketIO(app)
 
-
 # Homepage URL routing
 @app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == 'GET':
-        socketio.emit("test", "Hello from Flask SocketIO!")
-        return "HELLO"
+    return Response(status = 200)
+
+@app.route("/socket_emit", methods=["POST"])
+def socket_emit_route():
+    """
+    Emits a string through SocketIO
+    ---
+
+    Data:
+        byte string containing message
+
+    Parameters:
+        path : String with SocketIO path
+    """
+    if request.method == "POST":
+        path = request.args.get("path")
+        if path is None:
+            return Response(status = 400)
+
+        # Convert bytes to string and emit on socket
+        socketio.emit(path, request.data.decode("utf-8"))
+        return Response(status = 200)
     else:
-        data = request.form["msg"]
-        print(data)
-        socketio.emit("test", data)
-        return "Success"
+        return Response(status = 404)
 
 
 @app.route("/detect_color", methods=["POST"])
@@ -45,8 +60,7 @@ def detect_color_route():
         jpg encoded image data
 
     Parameters:
-        k : Query parameter.
-            The number of colors to return. Defaults to 3 if this parameter is
+        k : The number of colors to return. Defaults to 3 if this parameter is
             not provided.
 
     Response:
@@ -104,8 +118,7 @@ def detect_color_2_route():
         jpg encoded image data
 
     Parameters:
-        k : Query parameter.
-            The number of colors to return. Defaults to 3 if this paramter is
+        k : The number of colors to return. Defaults to 3 if this paramter is
             not provided.
 
     Response:
@@ -163,7 +176,7 @@ def ocr_route():
         Base64 encoded string of image data
 
     Parameters:
-        type : Query parameter.
+        type :
             "DOCUMENT_TEXT_DETECTION" for document text,
             "TEXT_DETECTION" for everything else (in-the-wild and handwritten).
             Defaults to "TEXT_DETECTION" if not provided.
@@ -214,7 +227,7 @@ def ocr_route():
 
 @socketio.on("connect")
 def connect():
-    print("Succesfully connected")
+    print("socket connected")
 
 
 if __name__ == "__main__":
