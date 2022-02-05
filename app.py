@@ -9,8 +9,11 @@ import numpy as np
 from flask import Flask, request, Response
 from flask_socketio import SocketIO
 import requests
+import torch
+import torchvision.transforms as transforms
 
 from color_detection.detect import detect_color, detect_color_2
+from money_classification.model_inference import load_model, run_inference
 
 
 # Initialize flask app
@@ -20,6 +23,14 @@ app = Flask(__name__)
 # enables secure client connection
 app.config["SECRET_KEY"] = os.urandom(12)
 socketio = SocketIO(app)
+
+# Use gpu if available
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using device: {device}")
+
+# Load in money classification model
+model = load_model("noble-sweep-7_best_model.pt", device)
+
 
 # Homepage URL routing
 @app.route("/", methods=["GET", "POST"])
@@ -223,6 +234,29 @@ def ocr_route():
         )
     else:
         return Response(status = 404)
+
+@app.route("/classify_money", methods=["POST"])
+def classify_money():
+    if request.method == "POST":
+        # Convert string of image data to uint8
+        np_arr = np.frombuffer(request.data, np.uint8)
+
+        # Decode image
+        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        # Run inference on image
+        prediction = run_inference(model, img, device)
+
+        # Prepare and return response
+        response = {"predicted_class" : prediction}
+        return Response(
+            response = jsonpickle.encode(response),
+            status = 200,
+            mimetype = "application/json"
+        )
+    else:
+        return "ERROR"
 
 
 @socketio.on("connect")

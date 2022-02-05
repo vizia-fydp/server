@@ -16,7 +16,6 @@ def color_detection_test(filename):
     headers = {"content-type": content_type}
     params = {"k": 3}
 
-    # img = cv2.imread("img/lego.png")
     img = cv2.imread(filename)
 
     # encode image as jpeg
@@ -61,6 +60,26 @@ def ocr_test(filename):
         return json.loads(response.text)
 
 
+def money_classification_test(filename):
+    # prepare headers for http request
+    content_type = "image/jpeg"
+    headers = {"content-type": content_type}
+
+    img = cv2.imread(filename)
+
+    # encode image as jpeg
+    _, img_encoded = cv2.imencode(".jpg", img)
+
+    # Send request
+    response = requests.post(
+        url = "{}/classify_money".format(URL),
+        data = img_encoded.tobytes(),
+        headers = headers
+    )
+
+    return json.loads(response.text)
+
+
 def socket_test(path):
     params = {"path": path}
     msg = ("There are roughly 253 million people globally who have some form "
@@ -76,15 +95,21 @@ def socket_test(path):
         data = msg,
         params = params
     )
+    return json.loads(response.text)
+
 
 if __name__ == "__main__":
     ### Color det test
-    response = color_detection_test("test_images/color_detection/flowers.jpg")
-    print(response)
+    # response = color_detection_test("test_images/color_detection/flowers.jpg")
+    # print(response)
 
     ### OCR test
-    response = ocr_test("test_images/ocr/eardrops.jpg")
+    # response = ocr_test("test_images/ocr/eardrops.jpg")
+    # print(response)
+
+    ### Money classification test
+    response = money_classification_test("test_images/money_classification/100.jpeg")
     print(response)
 
-    socket_test("iOS_info")
+    #socket_test("iOS_info")
     # socket_test("iOS_results")
