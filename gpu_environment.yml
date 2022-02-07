@@ -1,4 +1,4 @@
-name: fydp-server
+name: vizia-server-gpu
 channels:
   - pytorch
   - conda-forge
