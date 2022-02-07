@@ -7,9 +7,11 @@ dependencies:
   - pytorch::pytorch
   - pytorch::torchvision
   - nvidia::cudatoolkit=11.1
+  - opencv
+  - libopencv
+  - py-opencv
   - flask
   - flask-socketio>=5.1.1
   - requests
   - jsonpickle
-  - opencv
   - pandas

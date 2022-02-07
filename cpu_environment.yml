@@ -7,9 +7,11 @@ dependencies:
   - pytorch::pytorch
   - pytorch::torchvision
   - pytorch::cpuonly
+  - opencv
+  - libopencv
+  - py-opencv
   - flask
   - flask-socketio>=5.1.1
   - requests
   - jsonpickle
-  - opencv
   - pandas
