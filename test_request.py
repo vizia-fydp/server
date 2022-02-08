@@ -7,14 +7,19 @@ import cv2
 
 
 #URL = "http://127.0.0.1:5000"
-URL = "https://1d97-2607-fea8-1c83-1400-7138-64d8-abb9-b61b.ngrok.io"
+URL = "https://4eb6-2607-fea8-1c83-1400-f050-47bb-c7ac-6f0c.ngrok.io"
+
+
+# SocketIO paths that iOS app listens on
+IOS_INFO = "iOS_info"
+IOS_RESULTS = "iOS_results"
 
 
 def color_detection_test(filename):
     # prepare headers for http request
     content_type = "image/jpeg"
     headers = {"content-type": content_type}
-    params = {"k": 3}
+    params = {"k": 3, "socket_emit_path": IOS_INFO}
 
     img = cv2.imread(filename)
 
@@ -39,7 +44,7 @@ def ocr_test(filename):
     # prepare headers for http request
     content_type = "image/jpeg"
     headers = {"content-type": content_type}
-    params = {"type": "TEXT_DETECTION"}
+    params = {"type": "TEXT_DETECTION", "socket_emit_path": IOS_RESULTS}
 
     with open(filename, 'rb') as img_file:
         img_content = img_file.read()
@@ -64,6 +69,7 @@ def money_classification_test(filename):
     # prepare headers for http request
     content_type = "image/jpeg"
     headers = {"content-type": content_type}
+    params = {"socket_emit_path": IOS_INFO}
 
     img = cv2.imread(filename)
 
@@ -74,7 +80,8 @@ def money_classification_test(filename):
     response = requests.post(
         url = "{}/classify_money".format(URL),
         data = img_encoded.tobytes(),
-        headers = headers
+        headers = headers,
+        params = params
     )
 
     return json.loads(response.text)
@@ -110,5 +117,5 @@ if __name__ == "__main__":
     response = money_classification_test("test_images/money_classification/100.jpeg")
     print(response)
 
-    #socket_test("iOS_info")
+    # socket_test("iOS_info")
     # socket_test("iOS_results")

@@ -1,5 +1,4 @@
 import os
-import time
 from pathlib import Path
 
 import cv2
@@ -33,9 +32,11 @@ model = load_model("noble-sweep-7_best_model.pt", device)
 
 
 # Homepage URL routing
+# Can be used as a liveness check
 @app.route("/", methods=["GET", "POST"])
 def index():
     return Response(status = 200)
+
 
 @app.route("/socket_emit", methods=["POST"])
 def socket_emit_route():
@@ -73,6 +74,7 @@ def detect_color_route():
     Parameters:
         k : The number of colors to return. Defaults to 3 if this parameter is
             not provided.
+        socket_emit_path : If present, emit results on this socketIO path
 
     Response:
         colors: A single string with color results in order from
@@ -108,8 +110,14 @@ def detect_color_route():
                 else:
                     color_text += "{}, ".format(color)
 
-        # Prepare and return response
+        # Prepare response
         response = {"colors" : color_text, "rgb" : rgb_array}
+
+        # Emit on socket if specified
+        socket_emit_path = request.args.get("socket_emit_path")
+        if socket_emit_path is not None:
+            socketio.emit(socket_emit_path, color_text)
+
         return Response(
             response = jsonpickle.encode(response),
             status = 200,
@@ -131,6 +139,7 @@ def detect_color_2_route():
     Parameters:
         k : The number of colors to return. Defaults to 3 if this paramter is
             not provided.
+        socket_emit_path : If present, emit results on this socketIO path
 
     Response:
         colors: A single string with color results in order from
@@ -165,8 +174,14 @@ def detect_color_2_route():
                 else:
                     color_text += "{}, ".format(color)
 
-        # Prepare and return response
+        # Prepare response
         response = {"colors" : color_text}
+
+        # Emit on socket if specified
+        socket_emit_path = request.args.get("socket_emit_path")
+        if socket_emit_path is not None:
+            socketio.emit(socket_emit_path, color_text)
+
         return Response(
             response = jsonpickle.encode(response),
             status = 200,
@@ -191,6 +206,7 @@ def ocr_route():
             "DOCUMENT_TEXT_DETECTION" for document text,
             "TEXT_DETECTION" for everything else (in-the-wild and handwritten).
             Defaults to "TEXT_DETECTION" if not provided.
+        socket_emit_path : If present, emit results on this socketIO path
 
     Response:
         text: A single string containing all the OCR results
@@ -227,6 +243,11 @@ def ocr_route():
                 .replace("\n", " ")
         }
 
+        # Emit on socket if specified
+        socket_emit_path = request.args.get("socket_emit_path")
+        if socket_emit_path is not None:
+            socketio.emit(socket_emit_path, response["text"])
+
         return Response(
             response = jsonpickle.encode(response),
             status = 200,
@@ -235,8 +256,23 @@ def ocr_route():
     else:
         return Response(status = 404)
 
+
 @app.route("/classify_money", methods=["POST"])
 def classify_money():
+    """
+    Performs money classification on American Bills using resnet50
+    trained on a custom dataset.
+    ---
+
+    Data:
+        jpg encoded image data
+
+    Parameters:
+        socket_emit_path : If present, emit results on this socketIO path
+
+    Response:
+        predicted_class: One of [1, 5, 10, 20, 50, 100]
+    """
     if request.method == "POST":
         # Convert string of image data to uint8
         np_arr = np.frombuffer(request.data, np.uint8)
@@ -248,15 +284,21 @@ def classify_money():
         # Run inference on image
         prediction = run_inference(model, img, device)
 
-        # Prepare and return response
+        # Prepare response
         response = {"predicted_class" : prediction}
+
+        # Emit on socket if specified
+        socket_emit_path = request.args.get("socket_emit_path")
+        if socket_emit_path is not None:
+            socketio.emit(socket_emit_path, str(response["predicted_class"]))
+
         return Response(
             response = jsonpickle.encode(response),
             status = 200,
             mimetype = "application/json"
         )
     else:
-        return "ERROR"
+        return Response(status = 404)
 
 
 @socketio.on("connect")
