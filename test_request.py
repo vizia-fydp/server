@@ -7,7 +7,7 @@ import cv2
 
 
 #URL = "http://127.0.0.1:5000"
-URL = "https://b1af-64-229-183-215.ngrok.io"
+URL = "https://1d97-2607-fea8-1c83-1400-7138-64d8-abb9-b61b.ngrok.io"
 
 
 def color_detection_test(filename):
@@ -95,17 +95,16 @@ def socket_test(path):
         data = msg,
         params = params
     )
-    return json.loads(response.text)
 
 
 if __name__ == "__main__":
     ### Color det test
-    # response = color_detection_test("test_images/color_detection/flowers.jpg")
-    # print(response)
+    response = color_detection_test("test_images/color_detection/flowers.jpg")
+    print(response)
 
     ### OCR test
-    # response = ocr_test("test_images/ocr/eardrops.jpg")
-    # print(response)
+    response = ocr_test("test_images/ocr/eardrops.jpg")
+    print(response)
 
     ### Money classification test
     response = money_classification_test("test_images/money_classification/100.jpeg")
