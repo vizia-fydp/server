@@ -6,8 +6,8 @@ import requests
 import cv2
 
 
-#URL = "http://127.0.0.1:5000"
-URL = "https://4eb6-2607-fea8-1c83-1400-f050-47bb-c7ac-6f0c.ngrok.io"
+# URL = "http://127.0.0.1:5000"
+URL = "https://1c2b-2607-fea8-1c83-1400-a45c-96fc-c52d-a7b4.ngrok.io"
 
 
 # SocketIO paths that iOS app listens on
@@ -46,9 +46,11 @@ def ocr_test(filename):
     headers = {"content-type": content_type}
     params = {"type": "TEXT_DETECTION", "socket_emit_path": IOS_RESULTS}
 
-    with open(filename, 'rb') as img_file:
-        img_content = img_file.read()
-    encoded_img = base64.b64encode(img_content)
+    # Load image and encode as base64 string
+    img = cv2.imread(filename)
+    _, img_arr = cv2.imencode('.jpg', img)
+    img_bytes = img_arr.tobytes()
+    encoded_img = base64.b64encode(img_bytes)
 
     # Send request
     response = requests.post(
@@ -105,15 +107,15 @@ def socket_test(path):
 
 
 if __name__ == "__main__":
-    ### Color det test
+    # Color det test
     response = color_detection_test("test_images/color_detection/flowers.jpg")
     print(response)
 
-    ### OCR test
+    # OCR test
     response = ocr_test("test_images/ocr/eardrops.jpg")
     print(response)
 
-    ### Money classification test
+    # Money classification test
     response = money_classification_test("test_images/money_classification/100.jpeg")
     print(response)
 
