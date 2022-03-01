@@ -5,7 +5,7 @@ import torchvision
 from torchvision import transforms as tf
 from PIL import Image
 
-CLASS_MAP = [1, 5, 10, 20, 50, 100]
+CLASS_MAP = ["no_bill", "1", "5", "10", "20", "50", "100"]
 
 transforms = tf.Compose([
     tf.Resize((384, 384)),

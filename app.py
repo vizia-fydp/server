@@ -28,7 +28,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
 # Load in money classification model
-model = load_model("noble-sweep-7_best_model.pt", device)
+model = load_model("lucky-sweep-6_best_model.pt", device)
 
 
 # Homepage URL routing
