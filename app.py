@@ -49,14 +49,21 @@ def socket_emit_route():
 
     Parameters:
         path : String with SocketIO path
+        language: (Optional) ISO 639-1 language code
     """
     if request.method == "POST":
         path = request.args.get("path")
         if path is None:
             return Response(status = 400)
 
+        # English default if no language provided
+        language = request.args.get("language")
+        if language is None:
+            language = "en"
+
+        data = {"text": request.data.decode("utf-8"), "language": language}
         # Convert bytes to string and emit on socket
-        socketio.emit(path, request.data.decode("utf-8"))
+        socketio.emit(path, data)
         return Response(status = 200)
     else:
         return Response(status = 404)
@@ -210,6 +217,7 @@ def ocr_route():
 
     Response:
         text: A single string containing all the OCR results
+        language: ISO 639-1 language code. Eg: "en" for English, "fr" for French
     """
     if request.method == "POST":
         api_key = Path("ocr/api_key.txt").resolve().read_text()
@@ -239,14 +247,16 @@ def ocr_route():
         # Convert google api response to json
         r = json.loads(google_response.text)
 
-        # Extract text if found in google api response
+        # Extract text and language if found in google api response
         txt = "No text detected"
+        language = "en"
         if "fullTextAnnotation" in r["responses"][0]:
             txt = r["responses"][0]["fullTextAnnotation"]["text"] \
                 .replace("\n", " ")
+            language = r["responses"][0]["textAnnotations"][0]["locale"]
 
         # Prepare response dict
-        response = {"text" : txt}
+        response = {"text" : txt, "language": language}
 
         # Emit on socket if specified
         socket_emit_path = request.args.get("socket_emit_path")

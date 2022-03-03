@@ -7,12 +7,21 @@ import cv2
 
 
 # URL = "http://127.0.0.1:5000"
-URL = "https://1c2b-2607-fea8-1c83-1400-a45c-96fc-c52d-a7b4.ngrok.io"
-
+URL = "https://98dd-2620-101-f000-700-0-972a-bfd8-48e8.ngrok.io"
 
 # SocketIO paths that iOS app listens on
 IOS_INFO = "iOS_info"
 IOS_RESULTS = "iOS_results"
+
+# Long text for testing speech synthesis
+MSG_EN = ("There are roughly 253 million people globally who have some form "
+        "of visual impairment. Sighted individuals take for granted the "
+        "richness of visual information available to them in order to "
+        "navigate the world. We have developed wearable glasses that can "
+        "extract, decode, and communicate information from an image to a "
+        "visually impaired user through audio transcription. Our system "
+        "leverages computer vision to perform optical character "
+        "recognition, money classification, and colour detection")
 
 
 def color_detection_test(filename):
@@ -89,16 +98,8 @@ def money_classification_test(filename):
     return json.loads(response.text)
 
 
-def socket_test(path):
-    params = {"path": path}
-    msg = ("There are roughly 253 million people globally who have some form "
-           "of visual impairment. Sighted individuals take for granted the "
-           "richness of visual information available to them in order to "
-           "navigate the world. We have developed wearable glasses that can "
-           "extract, decode, and communicate information from an image to a "
-           "visually impaired user through audio transcription. Our system "
-           "leverages computer vision to perform optical character "
-           "recognition, money classification, and colour detection")
+def socket_test(path, msg, language):
+    params = {"path": path, "language" : language}
     requests.post(
         url = "{}/socket_emit".format(URL),
         data = msg,
@@ -122,5 +123,9 @@ if __name__ == "__main__":
     response = money_classification_test("test_images/money_classification/100.jpeg")
     print(response)
 
-    # socket_test("iOS_info")
-    # socket_test("iOS_results")
+    # Socket tests in various languages
+    # socket_test("iOS_info", MSG_EN, "en")
+    # socket_test("iOS_results", MSG_EN, "en")
+    # socket_test("iOS_results", "Bonjour Monsieur comment allez vous", "fr")
+    # socket_test("iOS_results", "مرحبا يا سيدي كيف حالك".encode("utf-8"), "ar")
+    # socket_test("iOS_results", "Hallo, Herr, wie geht es Ihnen?", "de")
