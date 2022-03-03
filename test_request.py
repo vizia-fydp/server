@@ -115,6 +115,9 @@ if __name__ == "__main__":
     response = ocr_test("test_images/ocr/eardrops.jpg")
     print(response)
 
+    response = ocr_test("test_images/color_detection/leaves.jpg")
+    print(response)
+
     # Money classification test
     response = money_classification_test("test_images/money_classification/100.jpeg")
     print(response)

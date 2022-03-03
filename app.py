@@ -236,12 +236,17 @@ def ocr_route():
             # If we got an error, just return it
             return google_response
 
-        # Extract text from vision api response and pack it in a response dict
+        # Convert google api response to json
         r = json.loads(google_response.text)
-        response = {"text" :
-            r["responses"][0]["fullTextAnnotation"]["text"]
+
+        # Extract text if found in google api response
+        txt = "No text detected"
+        if "fullTextAnnotation" in r["responses"][0]:
+            txt = r["responses"][0]["fullTextAnnotation"]["text"] \
                 .replace("\n", " ")
-        }
+
+        # Prepare response dict
+        response = {"text" : txt}
 
         # Emit on socket if specified
         socket_emit_path = request.args.get("socket_emit_path")
