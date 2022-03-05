@@ -1,15 +1,15 @@
-import os
-from pathlib import Path
-
 import cv2
 import json
 import jsonpickle
+import os
+import requests
+import socket
+import torch
 import numpy as np
+
 from flask import Flask, request, Response
 from flask_socketio import SocketIO
-import requests
-import torch
-import torchvision.transforms as transforms
+from pathlib import Path
 
 from color_detection.detect import detect_color, detect_color_2
 from money_classification.model_inference import load_model, run_inference
@@ -322,5 +322,12 @@ def connect():
 
 
 if __name__ == "__main__":
-    # Running on port 0 will force OS to assign a randomly available port number
-    socketio.run(app, port=0)
+    # Find an available port number
+    url = "127.0.0.1" # localhost
+    port = 0
+    with socket.socket() as s:
+        s.bind((url, 0))
+        port = s.getsockname()[1]
+
+    print("Server running on https://{}:{}".format(url, port))
+    socketio.run(app, port=port)
