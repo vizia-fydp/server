@@ -3,7 +3,7 @@ bidict==0.21.4
 certifi==2021.10.8
 charset-normalizer==2.0.12
 click==8.0.4
-dnspython==2.2.1
+dnspython
 eventlet==0.30.2
 Flask==2.0.3
 Flask-SocketIO==5.1.1
