@@ -321,13 +321,18 @@ def connect():
     print("socket connected")
 
 
-if __name__ == "__main__":
-    # Find an available port number
-    url = "127.0.0.1" # localhost
-    port = 0
-    with socket.socket() as s:
-        s.bind((url, 0))
-        port = s.getsockname()[1]
+#### Localhost testing ####
+# if __name__ == "__main__":
+#     # Find an available port number
+#     url = "127.0.0.1" # localhost
+#     port = 0
+#     with socket.socket() as s:
+#         s.bind((url, 0))
+#         port = s.getsockname()[1]
 
-    print("Server running on https://{}:{}".format(url, port))
-    socketio.run(app, port=port)
+#     print("Server running on https://{}:{}".format(url, port))
+#     socketio.run(app, port=port)
+
+#### Production ####
+if __name__ == "__main__":
+    socketio.run(app)
