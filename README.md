@@ -1,8 +1,8 @@
 # Server
-The Vizia server is responsible for all of the AI inference logic as well as forwarding the results to the iOS device. The server provides APIs for optical character recognition, colour detection, and US money detection.
+The Vizia server is responsible for all of the AI inference logic as well as forwarding the results to the iOS app. The server provides APIs for optical character recognition, colour detection, and US money detection.
 
 ## APIs
-* `/socket_emit`: Emits a string on a specified socket. Used to communicate state changes from the glasses to the phone.
+* `/socket_emit`: Emits a string on a specified socket. Used to communicate state changes from the glasses to the iOS app.
 * `/ocr`: Performs Optical Character Recognition (OCR) using the Google Cloud Vision API.
 * `/detect_color`: Performs color detection using k-means clustering.
 * `/detect_color_2`: Performs color detection using euclidean distance matching.
