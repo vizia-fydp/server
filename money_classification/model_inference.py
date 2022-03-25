@@ -1,49 +1,41 @@
-from pathlib import Path
+import numpy as np
+import cv2
 
-import torch
-import torchvision
-from torchvision import transforms as tf
-from PIL import Image
 
 CLASS_MAP = ["no_bill", "1", "5", "10", "20", "50", "100"]
-
-transforms = tf.Compose([
-    tf.Resize((384, 384)),
-    tf.ToTensor(),
-    tf.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
+IMG_SIZE = (384, 384)
+MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
 
-def load_model(filename, device):
-    # Assumes the model is located in money_classification folder
-    model_path = Path(__file__).resolve().parent / filename
+def preprocess_img(img):
+    """
+    Prepares numpy image for model inference. Needs to transform the tensor to
+    the required dimensions (1, 3, H, W), normalize, and convert to float32.
+    """
+    # Downsize to required model size
+    img = cv2.resize(img, IMG_SIZE, interpolation=cv2.INTER_AREA)
 
-    # Init model class
-    num_classes = len(CLASS_MAP)
-    model = torchvision.models.resnet50()
-    model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
-
-    # Load in the trained weights
-    model.load_state_dict(torch.load(model_path, map_location=device))
-    model.to(device)
-    model.eval()
-
-    return model
-
-def run_inference(model, image, device):
-    # Convert image to tensor and normalize
-    img = transforms(Image.fromarray(image))
+    # Need to normalize using given MEAN and STD and move channel dim to match torch convention
+    img = img.astype(np.float32) / 255.0
+    img = np.transpose(img, (2, 0, 1))
+    img = (img - MEAN[:, np.newaxis, np.newaxis]) / STD[:, np.newaxis, np.newaxis]
 
     # Add batch dim
-    img  = torch.unsqueeze(img, dim=0)
+    img = img[np.newaxis, :]
 
-    # Run image through model
-    img = img.to(device)
-    with torch.no_grad():
-        output = model(img)
+    return img
 
-    # Get actual class prediction
-    pred = torch.argmax(output, dim=1)[0].detach().cpu().numpy()
+def run_inference(session, img):
+    """
+    Runs inference using given onnx session then converts result to class name using class map.
+    """
+    # Prep image and then run inference using onnx session
+    img = preprocess_img(img)
+    output = session.run(None, {'input': img})[0]
+
+    # Get actual class prediction using clas map
+    pred = output.argmax(1)[0]
     class_pred = CLASS_MAP[pred]
 
     return class_pred
