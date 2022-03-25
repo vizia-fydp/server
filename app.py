@@ -300,6 +300,7 @@ def classify_money():
         prediction = run_inference(model, img, device)
 
         # Prepare response
+        prediction = "No bill detected" if prediction == "no_bill" else prediction
         response = {"predicted_class" : prediction}
 
         # Emit on socket if specified
