@@ -123,7 +123,7 @@ def detect_color_route():
         # Emit on socket if specified
         socket_emit_path = request.args.get("socket_emit_path")
         if socket_emit_path is not None:
-            socketio.emit(socket_emit_path, color_text)
+            socketio.emit(socket_emit_path, {"text": color_text})
 
         return Response(
             response = jsonpickle.encode(response),
@@ -187,7 +187,7 @@ def detect_color_2_route():
         # Emit on socket if specified
         socket_emit_path = request.args.get("socket_emit_path")
         if socket_emit_path is not None:
-            socketio.emit(socket_emit_path, color_text)
+            socketio.emit(socket_emit_path, {"text": color_text})
 
         return Response(
             response = jsonpickle.encode(response),
@@ -261,7 +261,7 @@ def ocr_route():
         # Emit on socket if specified
         socket_emit_path = request.args.get("socket_emit_path")
         if socket_emit_path is not None:
-            socketio.emit(socket_emit_path, response["text"])
+            socketio.emit(socket_emit_path, response)
 
         return Response(
             response = jsonpickle.encode(response),
@@ -305,7 +305,7 @@ def classify_money():
         # Emit on socket if specified
         socket_emit_path = request.args.get("socket_emit_path")
         if socket_emit_path is not None:
-            socketio.emit(socket_emit_path, str(response["predicted_class"]))
+            socketio.emit(socket_emit_path, {"text": str(response["predicted_class"])})
 
         return Response(
             response = jsonpickle.encode(response),
