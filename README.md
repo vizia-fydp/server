@@ -37,4 +37,4 @@ ngrok http <port>
 `ngrok` is a useful free tool for localhost tunnelling, which provides a URL that can be used to access the server from other machines.
 
 #### Production
-For a more permanent solution, it would be best to use something like Amazon EC2. We tried to use AWS Lambda and Heroku, but had problems with both. (Too big for AWS Lambda, and deployment issues with Heroku)
+For a more permanent solution, it would be best to use something like Amazon EC2. We tried to use AWS Lambda and Heroku, but had deployment problems with both.
