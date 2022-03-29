@@ -1,10 +1,12 @@
-name: vizia-server
+name: vizia-server-gpu
 channels:
   - anaconda
   - conda-forge
   - defaults
 dependencies:
-  - onnxruntime
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - nvidia::cudatoolkit=11.1
   - opencv
   - libopencv
   - py-opencv

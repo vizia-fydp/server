@@ -1,18 +1,19 @@
-import os
-from pathlib import Path
-
 import cv2
 import json
 import jsonpickle
+import os
+import requests
+import socket
 import numpy as np
+
 from flask import Flask, request, Response
 from flask_socketio import SocketIO
 import requests
 import onnxruntime as ort
+from pathlib import Path
 
 from color_detection.detect import detect_color, detect_color_2
 from money_classification.model_inference import run_inference
-
 
 # Initialize flask app
 app = Flask(__name__)
@@ -43,14 +44,21 @@ def socket_emit_route():
 
     Parameters:
         path : String with SocketIO path
+        language: (Optional) ISO 639-1 language code
     """
     if request.method == "POST":
         path = request.args.get("path")
         if path is None:
             return Response(status = 400)
 
+        # English default if no language provided
+        language = request.args.get("language")
+        if language is None:
+            language = "en"
+
+        data = {"text": request.data.decode("utf-8"), "language": language}
         # Convert bytes to string and emit on socket
-        socketio.emit(path, request.data.decode("utf-8"))
+        socketio.emit(path, data)
         return Response(status = 200)
     else:
         return Response(status = 404)
@@ -110,7 +118,7 @@ def detect_color_route():
         # Emit on socket if specified
         socket_emit_path = request.args.get("socket_emit_path")
         if socket_emit_path is not None:
-            socketio.emit(socket_emit_path, color_text)
+            socketio.emit(socket_emit_path, {"text": color_text})
 
         return Response(
             response = jsonpickle.encode(response),
@@ -174,7 +182,7 @@ def detect_color_2_route():
         # Emit on socket if specified
         socket_emit_path = request.args.get("socket_emit_path")
         if socket_emit_path is not None:
-            socketio.emit(socket_emit_path, color_text)
+            socketio.emit(socket_emit_path, {"text": color_text})
 
         return Response(
             response = jsonpickle.encode(response),
@@ -204,6 +212,7 @@ def ocr_route():
 
     Response:
         text: A single string containing all the OCR results
+        language: ISO 639-1 language code. Eg: "en" for English, "fr" for French
     """
     if request.method == "POST":
         api_key = Path("ocr/api_key.txt").resolve().read_text()
@@ -230,17 +239,24 @@ def ocr_route():
             # If we got an error, just return it
             return google_response
 
-        # Extract text from vision api response and pack it in a response dict
+        # Convert google api response to json
         r = json.loads(google_response.text)
-        response = {"text" :
-            r["responses"][0]["fullTextAnnotation"]["text"]
+
+        # Extract text and language if found in google api response
+        txt = "No text detected"
+        language = "en"
+        if "fullTextAnnotation" in r["responses"][0]:
+            txt = r["responses"][0]["fullTextAnnotation"]["text"] \
                 .replace("\n", " ")
-        }
+            language = r["responses"][0]["textAnnotations"][0]["locale"]
+
+        # Prepare response dict
+        response = {"text" : txt, "language": language}
 
         # Emit on socket if specified
         socket_emit_path = request.args.get("socket_emit_path")
         if socket_emit_path is not None:
-            socketio.emit(socket_emit_path, response["text"])
+            socketio.emit(socket_emit_path, response)
 
         return Response(
             response = jsonpickle.encode(response),
@@ -279,12 +295,13 @@ def classify_money():
         prediction = run_inference(ort_sess, img)
 
         # Prepare response
+        prediction = "No bill detected" if prediction == "no_bill" else prediction
         response = {"predicted_class" : prediction}
 
         # Emit on socket if specified
         socket_emit_path = request.args.get("socket_emit_path")
         if socket_emit_path is not None:
-            socketio.emit(socket_emit_path, str(response["predicted_class"]))
+            socketio.emit(socket_emit_path, {"text": str(response["predicted_class"])})
 
         return Response(
             response = jsonpickle.encode(response),
@@ -300,6 +317,18 @@ def connect():
     print("socket connected")
 
 
+#### Localhost testing ####
 if __name__ == "__main__":
-    # Running on port 0 will force OS to assign a randomly available port number
-    socketio.run(app, port=0)
+    # Find an available port number
+    url = "127.0.0.1" # localhost
+    port = 0
+    with socket.socket() as s:
+        s.bind((url, 0))
+        port = s.getsockname()[1]
+
+    print("Server running on https://{}:{}".format(url, port))
+    socketio.run(app, port=port)
+
+#### Production ####
+# if __name__ == "__main__":
+#     socketio.run(app)
