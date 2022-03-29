@@ -7,7 +7,7 @@ import cv2
 
 
 # URL = "http://127.0.0.1:5000"
-URL = "https://98dd-2620-101-f000-700-0-972a-bfd8-48e8.ngrok.io"
+URL = "https://3e6b-2607-fea8-1ca4-b000-387e-d423-83cc-135f.ngrok.io"
 
 # SocketIO paths that iOS app listens on
 IOS_INFO = "iOS_info"

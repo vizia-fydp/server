@@ -1,0 +1,17 @@
+name: vizia-server
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - onnxruntime
+  - opencv
+  - libopencv
+  - py-opencv
+  - flask
+  - flask-socketio>=5.1.1
+  - requests
+  - gevent-websocket
+  - eventlet
+  - jsonpickle
+  - pandas

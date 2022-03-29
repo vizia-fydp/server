@@ -4,16 +4,16 @@ import jsonpickle
 import os
 import requests
 import socket
-import torch
 import numpy as np
 
 from flask import Flask, request, Response
 from flask_socketio import SocketIO
+import requests
+import onnxruntime as ort
 from pathlib import Path
 
 from color_detection.detect import detect_color, detect_color_2
-from money_classification.model_inference import load_model, run_inference
-
+from money_classification.model_inference import run_inference
 
 # Initialize flask app
 app = Flask(__name__)
@@ -23,13 +23,8 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(12)
 socketio = SocketIO(app)
 
-# Use gpu if available
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f"Using device: {device}")
-
-# Load in money classification model
-model = load_model("lucky-sweep-6_best_model.pt", device)
-
+# Load in ONNX model as an inference session
+ort_sess = ort.InferenceSession('money_classification/lucky-sweep-6_best_model.onnx')
 
 # Homepage URL routing
 # Can be used as a liveness check
@@ -297,7 +292,7 @@ def classify_money():
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         # Run inference on image
-        prediction = run_inference(model, img, device)
+        prediction = run_inference(ort_sess, img)
 
         # Prepare response
         prediction = "No bill detected" if prediction == "no_bill" else prediction

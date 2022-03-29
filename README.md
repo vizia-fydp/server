@@ -14,25 +14,7 @@ Dependencies to run the server can be installed using either conda or python vir
 #### Conda
 Install miniconda and create environment from given file:
 ```
-conda env create -f gpu_environment.yml
-```
-
-Or if using CPU:
-```
-conda env create -f cpu_environment.yml
-```
-
-If that fails, create a new env with Python 3.9 and install the following libraries:
-```
-conda create -n fydp-server python=3.9
-conda config --add channels conda-forge
-conda install pytorch torchvision cudatoolkit=11.1 -c pytorch -c nvidia
-conda install -c conda-forge jsonpickle opencv flask requests flask-socketio pandas gevent-websocket eventlet
-```
-
-If using CPU instead of GPU, run the following command instead of the other pytorch command:
-```
-conda install pytorch torchvision cpuonly -c pytorch
+conda env create -f environment.yml
 ```
 
 #### Virtual env
@@ -55,4 +37,4 @@ ngrok http <port>
 `ngrok` is a useful free tool for localhost tunnelling, which provides a URL that can be used to access the server from other machines.
 
 #### Production
-For a more permanent solution, it would be best to use something like Amazon EC2. We tried to use AWS Lambda and Heroku, but had problems with both. (Too big for AWS Lambda, and deployment issues with Heroku)
+For a more permanent solution, it would be best to use something like Amazon EC2. We tried to use AWS Lambda and Heroku, but had deployment problems with both.
