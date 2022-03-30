@@ -24,6 +24,12 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
+#### Google Cloud Vision API Setup
+To be able to perform OCR, an API key is needed for the Google Cloud Vision API. A Google account is first needed before proceeding. Then, complete the first 3 steps on the [setup page](https://cloud.google.com/vision/docs/setup) (Create a project, Enable billing, Enable the API). In your Google Cloud Console, go to APIs & Services using the navigation menu and then Credentials. Create a new API key and copy it to your clipboard. Store it using an environment variable on the machine you will be running the server with, using the following command (adding the command to the machine's bashrc file is recommended):
+```
+export GC_VISION_API_KEY="<api_key>"
+```
+
 ## Running the server
 ```
 python3 app.py
