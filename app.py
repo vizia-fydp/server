@@ -26,6 +26,9 @@ socketio = SocketIO(app)
 # Load in ONNX model as an inference session
 ort_sess = ort.InferenceSession('money_classification/lucky-sweep-6_best_model.onnx')
 
+# Read in Vision API key from env variable
+api_key = os.environ['GC_VISION_API_KEY']
+
 # Homepage URL routing
 # Can be used as a liveness check
 @app.route("/", methods=["GET", "POST"])
@@ -215,7 +218,6 @@ def ocr_route():
         language: ISO 639-1 language code. Eg: "en" for English, "fr" for French
     """
     if request.method == "POST":
-        api_key = Path("ocr/api_key.txt").resolve().read_text()
         detection_type = request.args.get("type")
         detection_type = "TEXT_DETECTION" if detection_type is None else detection_type
 
